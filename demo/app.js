@@ -13,10 +13,26 @@
   /* ── 1. drop & gather ───────────────────────────────────────────── */
   const intro = (() => {
     const stack = $('#itStack'), ui = document.getElementById('sc-intro');
-    const PW = 192, PH = 240;
-    let photos = [], timers = [];
+    let photos = [], timers = [], finals = [];
+
     function place(el, v) {
       el.style.transform = `translate3d(${v[0]}px,${v[1]}px,0) rotate(${v[2]}deg) scale(${v[3]})`;
+    }
+    // geometry is derived from the space that actually exists, not from constants:
+    // a short viewport (phone toolbar shown) shrinks the cards instead of clipping them
+    function geo() {
+      const w = W(), h = H();
+      const ph = Math.max(148, Math.min(240, (h - 336) * 0.62));
+      const pw = Math.round(ph * 0.8), k = pw / 192;
+      const baseX = (w - pw) / 2;
+      const stackY = Math.max(176, Math.min(292, h - ph - 148));
+      return { w, h, pw, ph, k, baseX, stackY };
+    }
+    function slots(g) {
+      const offs = [-72, -25, 25, 72], fy = [6, -12, 6, -12], fr = [-14, -5, 5, 13];
+      const out = offs.map((o, i) => [g.baseX + o * g.k, g.stackY + fy[i], fr[i], 0.94]);
+      out.push([g.baseX, g.h + g.ph + 80, -18, 0.9]);
+      return out;
     }
     function build() {
       if (photos.length) return;
@@ -28,27 +44,30 @@
         photos.push(d);
       }
     }
+    function measure(g) { photos.forEach((p) => { p.style.width = g.pw + 'px'; p.style.height = g.ph + 'px'; }); }
+
     function enter() {
       build();
       timers.forEach(clearTimeout);
       timers = [];
       ui.classList.remove('it-in');
-      const w = W(), baseX = (w - PW) / 2;
+      const g = geo();
+      measure(g);
+      finals = slots(g);
       const JX = [-18, 12, -8, 16, -2], JY = [0, 10, 4, 14, 8], ROT = [-9, 6, -4, 9, -3];
 
       photos.forEach((p, i) => {
         p.style.opacity = '0';
-        p._v = [baseX, -PH - 60, 0, 1];
+        p._v = [g.baseX, -g.ph - 60, 0, 1];
         place(p, p._v);
       });
 
       photos.forEach((p, i) => {
         timers.push(setTimeout(() => {
           p.style.opacity = '1';
-          const from = [baseX, -PH - 60, 0, 1];
-          const to = [baseX + JX[i], 292 + JY[i], ROT[i], 1];
+          const to = [g.baseX + JX[i] * g.k, g.stackY + JY[i], ROT[i], 1];
           MO.springVec({
-            from, to, stiffness: 300, damping: 21,
+            from: [g.baseX, -g.ph - 60, 0, 1], to, stiffness: 300, damping: 21,
             onUpdate: (v) => { p._v = v; place(p, v); },
             onComplete: () => { p._v = to.slice(); },
           });
@@ -57,24 +76,28 @@
 
       // gather: four spring into a fan, the fifth keeps falling out of frame
       timers.push(setTimeout(() => {
-        const fan = [[-72, 6, -14], [-25, -12, -5], [25, 6, 5], [72, -12, 13]];
         photos.forEach((p, i) => {
-          const from = p._v.slice();
-          const to = i < 4
-            ? [baseX + fan[i][0], 292 + fan[i][1], fan[i][2], 0.94]
-            : [baseX, H() + PH + 80, -18, 0.9];
+          const to = finals[i];
           MO.springVec({
-            from, to,
+            from: p._v.slice(), to,
             stiffness: i < 4 ? 250 : 130,
             damping: i < 4 ? 20 : 28,
             velocity: i < 4 ? undefined : [0, 520, 0, 0],
             onUpdate: (v) => { p._v = v; place(p, v); },
+            onComplete: () => { p._v = to.slice(); },
           });
         });
         ui.classList.add('it-in');
       }, 1080));
     }
-    return { enter };
+    // a toolbar collapsing changes the stage height: re-place without replaying
+    function relayout() {
+      const g = geo();
+      measure(g);
+      finals = slots(g);
+      photos.forEach((p, i) => { p._v = finals[i].slice(); place(p, finals[i]); });
+    }
+    return { enter, relayout };
   })();
 
   /* ── 2. fan stack swipe ─────────────────────────────────────────── */
@@ -101,17 +124,25 @@
       });
     }
     function layout() {
-      const cw = Math.round(W() * 0.7), ch = Math.round(cw * 1.25);
+      const w = W(), h = H();
+      const top = Math.max(104, Math.min(176, h * 0.2));
+      const reserve = 190;                       // info card + dots + hint
+      let ch = Math.min(w * 0.7 * 1.25, h - top - reserve);
+      ch = Math.max(168, Math.round(ch));
+      const cw = Math.round(ch / 1.25);
       cards.forEach((c) => {
         c.style.width = cw + 'px';
         c.style.height = ch + 'px';
-        c._cx = (W() - cw) / 2;
-        c._cy = Math.max(146, Math.min(176, H() * 0.21));
+        c._cx = (w - cw) / 2;
+        c._cy = top;
       });
-      const info = $('#fanInfo');
-      info.style.top = (cards[0]._cy + ch + 24) + 'px';
-      $('#fanDots').style.bottom = (H() - (cards[0]._cy + ch + 24 + 64 + 26)) + 'px';
-      info.classList.add('on');
+      $('#fanInfo').style.top = (top + ch + 20) + 'px';
+      $('#fanDots').style.bottom = Math.max(26, h - (top + ch + 20 + 60 + 20)) + 'px';
+      $('#fanInfo').classList.add('on');
+    }
+    function relayout() {
+      layout();
+      cards.forEach((c, i) => { const to = slot(i); c._v = to.slice(); place(i, to); });
     }
     function slot(i) {
       const d = i - idx;                        // 0 = front of the fan
@@ -187,7 +218,7 @@
       head(); arrange(null); drag();
       $$('i', dotBox).forEach((d, i) => d.classList.toggle('on', i === 0));
     }
-    return { enter };
+    return { enter, relayout };
   })();
 
   /* ── 3. swipe to triage ─────────────────────────────────────────── */
@@ -212,13 +243,25 @@
       });
     }
     function layout() {
-      const cw = Math.round(W() * 0.82), ch = Math.round(cw * 1.34);
-      const top0 = 92, bot0 = H() - 118;
+      const w = W(), h = H();
+      const top0 = 88, bot0 = h - 108;
+      let ch = Math.min(w * 0.82 * 1.34, bot0 - top0);
+      ch = Math.max(190, Math.round(ch));
+      const cw = Math.round(ch / 1.34);
       cards.forEach((c) => {
         c.style.width = cw + 'px';
         c.style.height = ch + 'px';
-        c._cx = (W() - cw) / 2;
-        c._cy = Math.max(top0, top0 + (bot0 - top0 - ch) / 2);
+        c._cx = (w - cw) / 2;
+        c._cy = top0 + Math.max(0, (bot0 - top0 - ch) / 2);
+      });
+    }
+    function relayout() {
+      layout();
+      cards.forEach((c, i) => {
+        if (c.dataset.gone === '1') return;
+        const to = i < top ? [0, 0, 0, 1] : slot(i);
+        c._v = to.slice();
+        place(c, to);
       });
     }
     function place(c, v) {
@@ -316,7 +359,7 @@
       $('#trReset').onclick = reset;
       reset();
     }
-    return { enter, fling, reset };
+    return { enter, relayout, fling, reset };
   })();
 
   /* ── 4. shared element expand ──────────────────────────────────── */
@@ -472,7 +515,11 @@
       openBtn.onclick = show;
       if (!panel.dataset.bound) { panel.dataset.bound = '1'; drag(); }
     }
-    return { enter, dismiss, show };
+    function relayout() {
+      h = panel.offsetHeight + 40;
+      if (up) { y = 0; setY(0); setScale(1); }
+    }
+    return { enter, relayout, dismiss, show };
   })();
 
   /* ── 6. staggered title swap ───────────────────────────────────── */
@@ -759,10 +806,25 @@
 
   $$('#chips button').forEach((b) => b.addEventListener('click', (e) => show(b.dataset.sc, e)));
 
-  let rt;
+  // a phone toolbar collapsing changes the stage height without a window resize on
+  // every browser: watch the stage box and re-place instead of replaying the scene
+  let rt, last = [stage.clientWidth, stage.clientHeight];
+  const reflow = () => {
+    const s = SCENES[cur];
+    if (s.relayout) s.relayout(); else s.enter();
+  };
+  try {
+    new ResizeObserver(() => {
+      const w = stage.clientWidth, h = stage.clientHeight;
+      if (Math.abs(w - last[0]) < 6 && Math.abs(h - last[1]) < 6) return;
+      last = [w, h];
+      clearTimeout(rt);
+      rt = setTimeout(reflow, 120);
+    }).observe(stage);
+  } catch (e) { /* no ResizeObserver: the resize listener below still covers it */ }
   window.addEventListener('resize', () => {
     clearTimeout(rt);
-    rt = setTimeout(() => SCENES[cur].enter(), 220);
+    rt = setTimeout(() => { last = [stage.clientWidth, stage.clientHeight]; reflow(); }, 180);
   });
 
   SCENES.intro.enter();

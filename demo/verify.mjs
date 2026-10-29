@@ -247,6 +247,27 @@ ok('no horizontal overflow @390', (await ev('document.documentElement.scrollWidt
 await ev("document.querySelector('[data-sc=intro]').click()"); await sleep(1500);
 await shot('10-390-intro', '.phone');
 
+console.log('\n— short viewport 390x680 (phone with toolbars) —');
+await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 680, deviceScaleFactor: 2, mobile: true });
+await sleep(500);
+for (const id of ['intro', 'fan', 'triage', 'expand', 'sheet', 'titles', 'wheel', 'comp', 'casc']) {
+  await ev(`document.querySelector('[data-sc=${id}]').click()`);
+  await sleep(1100);
+  const bad = await ev(`(() => { const st = document.querySelector('#stage').getBoundingClientRect();
+    const sel = ['.fan-info','.fan-dots','.fan-hint','.tr-actions','.tr-hint','.ca-foot','.ca-tip','.cp-btn',
+      '.ts-next','.wh-value','#shSheet','.ex-grid','.it-panel','.it-title','.sh-open'];
+    const out = [];
+    for (const s of sel) { const el = document.querySelector('.sc.on ' + s); if (!el) continue;
+      const r = el.getBoundingClientRect();
+      if (r.height === 0) continue;
+      if (r.bottom > st.bottom + 1 || r.top < st.top - 1 || r.right > st.right + 1) out.push(s + ' ' + Math.round(r.top) + '-' + Math.round(r.bottom)); }
+    return out; })()`);
+  ok('scene fits at 390x680 · ' + id, bad.length === 0, bad.join(', '));
+  if (id === 'fan') await shot('12-short-fan', '.phone');
+  if (id === 'triage') await shot('12-short-triage', '.phone');
+  if (id === 'casc') await shot('12-short-casc', '.phone');
+}
+
 console.log('\n— reduced motion —');
 await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
 await send('Page.reload'); await sleep(1600);

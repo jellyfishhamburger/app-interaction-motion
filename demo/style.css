@@ -270,7 +270,31 @@ body{background:#16130f;color:#efe9dd;font-family:var(--font);display:flex;justi
     scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .chips::-webkit-scrollbar{display:none}
   .chips button{flex:none}
-  .phone{width:calc(100vw - 12px);height:calc(100dvh - 126px);border-radius:32px;
+  html,body{height:100%;overflow:hidden}
+  .phone{width:calc(100vw - 12px);height:calc(100vh - 104px);height:calc(100dvh - 104px);border-radius:32px;
     box-shadow:0 0 0 7px #1d1a16,0 0 0 8px #35302a,0 30px 60px -30px rgba(0,0,0,.8)}
   .note{display:none}
+}
+
+/* ---------- short viewports (phone with toolbars visible): shrink, never clip ---------- */
+@media (max-height:720px){
+  .it-title{font-size:32px}
+  .it-panel{padding:13px}
+  .it-panel p{font-size:12.5px;margin-bottom:11px}
+  .fan-title{font-size:25px}
+  .ex-grid{top:88px}
+  .ts-hero{height:42%}
+  .ts-title{font-size:27px}
+  .sh-sheet{height:62%;border-radius:20px}
+  .wh-vp{height:236px;margin-top:-118px}
+  .cp-card{top:30px;bottom:100px}
+  .cp-card .ph{min-height:120px}
+  .cp-btn{bottom:32px;height:48px;width:212px}
+  .ca-ring{top:104px;width:82px;height:82px}
+  .ca-ring svg{width:82px;height:82px}
+  .ca-body{top:204px;bottom:62px}
+  .ca-list li{padding:10px 13px;font-size:13px}
+  .ca-foot{padding:10px 13px}
+  .tr-hint,.fan-hint{bottom:14px}
+  .ex-desc{display:none}
 }

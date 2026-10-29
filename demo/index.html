@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>App 交互动效实验台 · 9 个细节</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <nav class="chips" id="chips" role="tablist" aria-label="交互场景">
+    <button role="tab" data-sc="intro" aria-selected="true">开场落下</button>
+    <button role="tab" data-sc="fan" aria-selected="false">扇形叠</button>
+    <button role="tab" data-sc="triage" aria-selected="false">滑动分拣</button>
+    <button role="tab" data-sc="expand" aria-selected="false">共享元素</button>
+    <button role="tab" data-sc="sheet" aria-selected="false">可收面板</button>
+    <button role="tab" data-sc="titles" aria-selected="false">逐行标题</button>
+    <button role="tab" data-sc="wheel" aria-selected="false">惯性滚轮</button>
+    <button role="tab" data-sc="comp" aria-selected="false">完成反馈</button>
+    <button role="tab" data-sc="casc" aria-selected="false">联动勾选</button>
+  </nav>
+
+  <div class="phone">
+    <div class="stage" id="stage">
+
+      <!-- 1 · intro -->
+      <section class="sc on" id="sc-intro" aria-label="开场落下收拢">
+        <div class="it-stack" id="itStack"></div>
+        <div class="it-top">
+          <div class="it-kicker">6 个目的地 · 3 天走完</div>
+          <h1 class="it-title">
+            <span class="ln"><i>去哪儿</i></span>
+            <span class="ln"><i>都由你</i></span>
+          </h1>
+        </div>
+        <div class="it-panel" id="itPanel">
+          <p>选一个方向，我们只排三天的行程：住哪儿、走哪条路、几点出发。</p>
+          <button class="it-cta">开始挑目的地</button>
+        </div>
+      </section>
+
+      <!-- 2 · fan stack -->
+      <section class="sc" id="sc-fan" aria-label="扇形叠切换">
+        <div class="fan-head">
+          <div class="fan-kicker" id="fanKicker">01 / 04</div>
+          <h2 class="fan-title" id="fanTitle">赛里木湖</h2>
+        </div>
+        <div class="fan-deck" id="fanDeck"></div>
+        <div class="fan-info" id="fanInfo">
+          <div><b id="fanMeta">高山冷水湖</b><span>3 天 · 2 晚 · 车程 2 小时</span></div>
+          <span class="fan-view">查看</span>
+        </div>
+        <div class="fan-dots" id="fanDots"></div>
+        <div class="fan-hint">左右滑动切换</div>
+      </section>
+
+      <!-- 3 · swipe to triage -->
+      <section class="sc" id="sc-triage" aria-label="滑动分拣">
+        <div class="tr-head"><h2>今天去哪儿</h2><span class="tr-count" id="trCount">剩 4 个</span></div>
+        <div class="tr-deck" id="trDeck"></div>
+        <div class="tr-stamp no" id="stampNo">跳过</div>
+        <div class="tr-stamp ok" id="stampOk">收藏</div>
+        <div class="tr-actions">
+          <span class="tr-btn">← 跳过</span><span class="tr-btn ok">收藏 →</span>
+        </div>
+        <div class="tr-hint">拖动卡片，或点下面的按钮</div>
+        <div class="tr-done" id="trDone" hidden>今天的都看完了<button id="trReset">再来一遍</button></div>
+      </section>
+
+      <!-- 4 · shared element expand -->
+      <section class="sc" id="sc-expand" aria-label="共享元素放大">
+        <div class="ex-head"><h2>附近的地方</h2><p>点开一个看看</p></div>
+        <div class="ex-grid" id="exGrid"></div>
+        <div class="ex-detail" id="exDetail">
+          <div class="ex-scrim" id="exScrim"></div>
+          <div class="ex-card" id="exCard"></div>
+          <button class="ex-back" id="exBack">← 附近的地方</button>
+          <div class="ex-under" id="exUnder">
+            <h3 id="exName">赛里木湖</h3>
+            <p id="exSub">高山冷水湖 · 车程 2 小时</p>
+            <p class="ex-desc">6 月湖面还有冰，7 月才化开。从伊宁出发走 S315，两小时到湖边；沿途没有加油站，出发前加满。</p>
+            <div class="ex-acts"><span class="ex-add">加入行程</span><span class="ex-ghost">看 24 张照片</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 · dismissible sheet -->
+      <section class="sc" id="sc-sheet" aria-label="可收起面板">
+        <div class="sh-map" id="shMap"></div>
+        <div class="sh-top" id="shTop">洱海西岸 · 才村</div>
+        <button class="sh-open" id="shOpen">展开行程</button>
+        <div class="sh-sheet" id="shSheet">
+          <div class="sh-handle" id="shHandle"></div>
+          <h3>洱海 3 天</h3>
+          <p>沿西岸骑行，傍晚到才村看日落。下面是已经排好的行程。</p>
+          <ul class="sh-list">
+            <li><i>D1</i>才村码头 · 骑行 12 km</li>
+            <li><i>D2</i>喜洲古镇 · 稻田与扎染</li>
+            <li><i>D3</i>双廊 · 返程</li>
+          </ul>
+          <button class="sh-close" id="shClose">收起</button>
+        </div>
+      </section>
+
+      <!-- 6 · staggered title swap -->
+      <section class="sc" id="sc-titles" aria-label="逐行标题切换">
+        <div class="ts-hero" id="tsHero"></div>
+        <div class="ts-body">
+          <h2 class="ts-title in" id="tsTitle">
+            <span class="mask"><i>把周末</i></span>
+            <span class="mask"><i>交给一座山</i></span>
+            <span class="mask"><i>和一条湖</i></span>
+          </h2>
+          <div class="ts-sub in" id="tsSub">3 天 · 2 晚 · 全程徒步</div>
+        </div>
+        <button class="ts-next" id="tsNext">换一批</button>
+      </section>
+
+      <!-- 7 · inertial wheel -->
+      <section class="sc" id="sc-wheel" aria-label="惯性滚轮">
+        <div class="wh-label">起床时间</div>
+        <div class="wh-vp" id="whVp"><div class="wh-col" id="whCol"></div></div>
+        <div class="wh-value">已选 <b id="whValue">07:00</b> · 会按这个时间排第一天的早餐</div>
+      </section>
+
+      <!-- 8 · complete button -->
+      <section class="sc" id="sc-comp" aria-label="完成反馈">
+        <div class="cp-card">
+          <div class="ph" id="cpPh"></div>
+          <div class="cp-body">
+            <h2>大理 · 3 天</h2>
+            <p>洱海骑行 · 苍山日落 · 喜洲稻田</p>
+            <ul class="cp-list">
+              <li><i>D1</i>才村码头 · 骑行 12 km</li>
+              <li><i>D2</i>喜洲古镇 · 稻田与扎染</li>
+              <li><i>D3</i>双廊 · 返程</li>
+            </ul>
+          </div>
+        </div>
+        <button class="cp-btn" id="cpBtn">
+          <span class="cp-label" id="cpLabel">加入行程</span>
+          <svg class="cp-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.6 L9.6 18 L20 6.4"/></svg>
+          <span class="cp-done">已加入 · 3 个地点</span>
+        </button>
+        <div class="cp-burst" id="cpBurst"></div>
+      </section>
+
+      <!-- 9 · linked cascade -->
+      <section class="sc" id="sc-casc" aria-label="联动勾选">
+        <header class="ca-head" id="caHead">
+          <h2>出发前 <span id="caCount">0 / 5</span></h2>
+        </header>
+        <div class="ca-ring">
+          <svg width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="42"/><circle cx="48" cy="48" r="42" id="caProg"/></svg>
+          <div class="ca-num"><span id="caNum">0</span></div>
+        </div>
+        <div class="ca-body">
+          <ul class="ca-list" id="caList">
+            <li data-key="a"><span class="ca-box"></span><b>护照与身份证</b></li>
+            <li data-key="b"><span class="ca-box"></span><b>充电宝（≤100Wh）</b></li>
+            <li data-key="c"><span class="ca-box"></span><b>雨衣 · 山里会下雨</b></li>
+            <li data-key="d"><span class="ca-box"></span><b>常用药与创可贴</b></li>
+            <li data-key="e"><span class="ca-box"></span><b>离线地图已下载</b></li>
+          </ul>
+          <div class="ca-foot"><b>行李已存好</b><span>出发前一天 08:00 提醒你再看一遍</span></div>
+        </div>
+        <div class="ca-tip">勾一项，进度环 / 数字 / 顶部背景一起动</div>
+      </section>
+
+    </div>
+  </div>
+
+  <p class="note" id="note"><b>开场落下</b> · 五张照片依次落下堆叠，四张用弹簧收成扇形，标题随后升起</p>
+</div>
+
+<script src="art.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
